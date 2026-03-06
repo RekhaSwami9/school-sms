@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { feeStructure, paymentsData, classes } from "../../services/mockData";
+import { useToast } from "../../context/ToastContext";
 
 const FeeManager = () => {
+  const { showSuccess, showToast } = useToast();
   const [activeTab, setActiveTab] = useState("structure");
+  const [sendingReminder, setSendingReminder] = useState(null);
 
   const totalCollected = paymentsData
     .filter((p) => p.status === "paid")
@@ -15,6 +18,16 @@ const FeeManager = () => {
   const pendingCount = paymentsData.filter(
     (p) => p.status === "pending",
   ).length;
+
+  const handleSendReminder = (payment) => {
+    setSendingReminder(payment.id);
+
+    // Simulate sending reminder
+    setTimeout(() => {
+      showSuccess(`Payment reminder sent to Student #${payment.studentId}!`);
+      setSendingReminder(null);
+    }, 1000);
+  };
 
   return (
     <div className="animate-fade-in">
@@ -264,8 +277,26 @@ const FeeManager = () => {
                           </span>
                         </td>
                         <td>
-                          <button className="btn btn-sm btn-primary">
-                            Send Reminder
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleSendReminder(payment)}
+                            disabled={sendingReminder === payment.id}
+                          >
+                            {sendingReminder === payment.id ? (
+                              <span>
+                                <span
+                                  className="loading-spinner"
+                                  style={{
+                                    width: "12px",
+                                    height: "12px",
+                                    marginRight: "4px",
+                                  }}
+                                ></span>
+                                Sending...
+                              </span>
+                            ) : (
+                              "Send Reminder"
+                            )}
                           </button>
                         </td>
                       </tr>

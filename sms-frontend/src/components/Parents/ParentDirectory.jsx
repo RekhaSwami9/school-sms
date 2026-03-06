@@ -1,27 +1,55 @@
-import { useState } from "react";
-import { parentsData, studentParentMapping } from "../../services/mockData";
+import { useState, useEffect } from "react";
+import { parentService } from "../../services/parentService";
+import { useToast } from "../../context/ToastContext";
 
 const ParentDirectory = () => {
+  const { showSuccess, showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedParent, setSelectedParent] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [parentsList, setParentsList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newParent, setNewParent] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    occupation: "",
+    address: "",
+  });
 
-  const filteredParents = parentsData.filter((parent) => {
+  useEffect(() => {
+    fetchParents();
+  }, []);
+
+  const fetchParents = async () => {
+    try {
+      setLoading(true);
+      const data = await parentService.getAll();
+      if (data.success) {
+        setParentsList(data.parents || []);
+      }
+    } catch (error) {
+      console.error("Error fetching parents:", error);
+      showToast("Failed to fetch parents", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredParents = parentsList.filter((parent) => {
+    const searchLower = searchTerm.toLowerCase();
     return (
-      parent.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      parent.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      parent.phone.includes(searchTerm) ||
-      parent.occupation.toLowerCase().includes(searchTerm.toLowerCase())
+      (parent.name && parent.name.toLowerCase().includes(searchLower)) ||
+      (parent.email && parent.email.toLowerCase().includes(searchLower)) ||
+      (parent.phone && parent.phone.includes(searchTerm)) ||
+      (parent.occupation &&
+        parent.occupation.toLowerCase().includes(searchLower))
     );
   });
 
   const getChildrenForParent = (parentId) => {
-    const mappings = studentParentMapping.filter(
-      (m) => m.parentId === parentId,
-    );
-    return mappings.map((m) => ({
-      studentId: m.studentId,
-      relation: m.relation,
-    }));
+    // For now, return empty - would need student-parent relationship API
+    return [];
   };
 
   const handleParentClick = (parent) => {
@@ -30,6 +58,59 @@ const ParentDirectory = () => {
 
   const handleCloseDetail = () => {
     setSelectedParent(null);
+  };
+
+  const handleAddParent = () => {
+    setShowAddModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowAddModal(false);
+    setNewParent({
+      name: "",
+      email: "",
+      phone: "",
+      occupation: "",
+      address: "",
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewParent((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmitParent = async (e) => {
+    e.preventDefault();
+
+    if (!newParent.name || !newParent.email) {
+      showToast("Please fill in required fields", "error");
+      return;
+    }
+
+    try {
+      const data = await parentService.create({
+        name: newParent.name,
+        email: newParent.email,
+        phone: newParent.phone,
+        occupation: newParent.occupation,
+        address: newParent.address,
+      });
+
+      if (data.success) {
+        showSuccess(`Parent "${newParent.name}" added successfully!`);
+        fetchParents();
+        handleCloseModal();
+      } else {
+        showToast(data.error || "Failed to create parent", "error");
+      }
+    } catch (error) {
+      console.error("Error creating parent:", error);
+      showToast("Failed to create parent", "error");
+    }
   };
 
   return (
@@ -50,37 +131,30 @@ const ParentDirectory = () => {
             <span className="stat-card-title">Total Parents</span>
             <div className="stat-card-icon">👨‍👩‍👧</div>
           </div>
-          <div className="stat-card-value">{parentsData.length}</div>
+          <div className="stat-card-value">{parentsList.length}</div>
         </div>
         <div className="stat-card-modern success">
           <div className="stat-card-header">
-            <span className="stat-card-title">Fathers</span>
+            <span className="stat-card-title">Active</span>
             <div className="stat-card-icon">👨</div>
           </div>
           <div className="stat-card-value">
-            {studentParentMapping.filter((m) => m.relation === "Father").length}
+            {parentsList.filter((p) => p.status === "Active").length}
           </div>
         </div>
         <div className="stat-card-modern warning">
           <div className="stat-card-header">
-            <span className="stat-card-title">Mothers</span>
+            <span className="stat-card-title">This Month</span>
             <div className="stat-card-icon">👩</div>
           </div>
-          <div className="stat-card-value">
-            {studentParentMapping.filter((m) => m.relation === "Mother").length}
-          </div>
+          <div className="stat-card-value">{parentsList.length}</div>
         </div>
         <div className="stat-card-modern secondary">
           <div className="stat-card-header">
-            <span className="stat-card-title">Guardians</span>
+            <span className="stat-card-title">Total</span>
             <div className="stat-card-icon">👥</div>
           </div>
-          <div className="stat-card-value">
-            {
-              studentParentMapping.filter((m) => m.relation === "Guardian")
-                .length
-            }
-          </div>
+          <div className="stat-card-value">{parentsList.length}</div>
         </div>
       </div>
 
@@ -113,7 +187,7 @@ const ParentDirectory = () => {
                 </span>
               </div>
             </div>
-            <button className="btn btn-primary">
+            <button className="btn btn-primary" onClick={handleAddParent}>
               <span>+</span> Add Parent
             </button>
           </div>
@@ -463,6 +537,142 @@ const ParentDirectory = () => {
           <p style={{ color: "var(--text-secondary)" }}>
             No parents found matching your search
           </p>
+        </div>
+      )}
+
+      {/* Add Parent Modal */}
+      {showAddModal && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "24px",
+              borderRadius: "12px",
+              maxWidth: "500px",
+              width: "90%",
+              maxHeight: "90vh",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+              }}
+            >
+              <h3 style={{ margin: 0 }}>Add New Parent</h3>
+              <button
+                onClick={handleCloseModal}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "var(--text-muted)",
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmitParent}>
+              <div style={{ marginBottom: "16px" }}>
+                <label className="form-label">Full Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={newParent.name}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  placeholder="e.g., John Smith"
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label className="form-label">Email *</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={newParent.email}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  placeholder="e.g., john.smith@email.com"
+                  required
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label className="form-label">Phone Number</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={newParent.phone}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  placeholder="e.g., +1 234 567 8900"
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label className="form-label">Occupation</label>
+                <input
+                  type="text"
+                  name="occupation"
+                  value={newParent.occupation}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  placeholder="e.g., Engineer, Doctor, Business"
+                />
+              </div>
+
+              <div style={{ marginBottom: "24px" }}>
+                <label className="form-label">Address</label>
+                <textarea
+                  name="address"
+                  value={newParent.address}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  placeholder="Enter address..."
+                  rows="3"
+                />
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  gap: "12px",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCloseModal}
+                >
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Add Parent
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

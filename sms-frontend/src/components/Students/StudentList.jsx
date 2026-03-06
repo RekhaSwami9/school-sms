@@ -15,6 +15,10 @@ const StudentList = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [classes, setClasses] = useState([]);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+
   // Filter states
   const [filters, setFilters] = useState({
     class_name: "",
@@ -47,6 +51,7 @@ const StudentList = () => {
       const data = await studentService.getAll();
       setStudents(data.students || []);
       setError(null);
+      setCurrentPage(1); // Reset to first page on fetch
     } catch (err) {
       setError("Failed to fetch students");
       console.error(err);
@@ -76,6 +81,7 @@ const StudentList = () => {
         ...filters,
       });
       setStudents(response.students || []);
+      setCurrentPage(1);
     } catch (err) {
       showToast("Search failed", "error");
     } finally {
@@ -95,6 +101,7 @@ const StudentList = () => {
         ...filters,
       });
       setStudents(response.students || []);
+      setCurrentPage(1);
       showToast(`Found ${response.count} students`, "success");
     } catch (err) {
       showToast("Failed to apply filters", "error");
@@ -142,6 +149,120 @@ const StudentList = () => {
 
   const handleEdit = (student) => {
     navigate(`/students/edit/${student.id}`);
+  };
+
+  // Export functionality
+  const handleExport = () => {
+    if (students.length === 0) {
+      showToast("No students to export", "warning");
+      return;
+    }
+
+    // Create CSV headers
+    const headers = [
+      "Admission No",
+      "Name",
+      "Email",
+      "Class",
+      "Section",
+      "Gender",
+      "DOB",
+      "Status",
+    ];
+
+    // Create CSV rows
+    const rows = students.map((student) => [
+      student.admission_no || "",
+      student.user?.name || "",
+      student.user?.email || "",
+      student.class_name || "",
+      student.section || "",
+      student.gender || "",
+      student.dob ? new Date(student.dob).toLocaleDateString() : "",
+      "active",
+    ]);
+
+    // Combine headers and rows
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+    ].join("\n");
+
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `students_export_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    link.style.visibility = "hidden";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    showSuccess(`Exported ${students.length} students successfully!`);
+  };
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentStudents = students.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(students.length / itemsPerPage);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  // Generate page numbers for display
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pageNumbers.push(1);
+        pageNumbers.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pageNumbers.push(i);
+        }
+      } else {
+        pageNumbers.push(1);
+        pageNumbers.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pageNumbers.push(i);
+        }
+        pageNumbers.push("...");
+        pageNumbers.push(totalPages);
+      }
+    }
+
+    return pageNumbers;
   };
 
   // Client-side filtering for additional refinement
@@ -267,7 +388,7 @@ const StudentList = () => {
                   </span>
                 )}
               </button>
-              <button className="btn btn-secondary">
+              <button className="btn btn-secondary" onClick={handleExport}>
                 <span>📥</span> Export
               </button>
               <Link to="/students/new" className="btn btn-primary">
@@ -491,7 +612,7 @@ const StudentList = () => {
                   </td>
                 </tr>
               ) : (
-                filteredStudents.map((student) => (
+                currentStudents.map((student) => (
                   <tr key={student.id}>
                     <td>
                       <div
@@ -627,22 +748,53 @@ const StudentList = () => {
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
+                flexWrap: "wrap",
+                gap: "16px",
               }}
             >
               <span
                 style={{ fontSize: "14px", color: "var(--text-secondary)" }}
               >
-                Showing 1 to {Math.min(filteredStudents.length, 10)} of{" "}
+                Showing {indexOfFirstItem + 1} to{" "}
+                {Math.min(indexOfLastItem, filteredStudents.length)} of{" "}
                 {filteredStudents.length} entries
               </span>
               <div style={{ display: "flex", gap: "8px" }}>
-                <button className="btn btn-sm btn-secondary" disabled>
+                <button
+                  className="btn btn-sm btn-secondary"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                >
                   Previous
                 </button>
-                <button className="btn btn-sm btn-primary">1</button>
-                <button className="btn btn-sm btn-secondary">2</button>
-                <button className="btn btn-sm btn-secondary">3</button>
-                <button className="btn btn-sm btn-secondary">Next</button>
+                {getPageNumbers().map((page, index) =>
+                  page === "..." ? (
+                    <span
+                      key={index}
+                      style={{
+                        padding: "6px 12px",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={index}
+                      className={`btn btn-sm ${currentPage === page ? "btn-primary" : "btn-secondary"}`}
+                      onClick={() => handlePageChange(page)}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+                <button
+                  className="btn btn-sm btn-secondary"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
               </div>
             </div>
           </div>

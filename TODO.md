@@ -1,62 +1,50 @@
-# School SMS - Functionality Implementation TODO
+# Deployment Readiness TODO
 
-## Phase 1: Fix Student CRUD Operations (Critical) ✅ COMPLETE
+## Phase 1: Backend APIs (Subjects, Parents, Fees)
 
-- [x] Add delete method to studentService.js
-- [x] Add update method to studentService.js
-- [x] Add getById method to studentService.js
-- [x] Add deleteStudent controller in backend
-- [x] Add updateStudent controller in backend
-- [x] Add getById controller in backend
-- [x] Add DELETE, PUT, GET /:id routes to students.js
-- [x] Connect View button in StudentList.jsx
-- [x] Connect Edit button in StudentList.jsx
-- [x] Add edit mode support to StudentForm.jsx
+### Subjects Management
 
-## Phase 2: Enhance Dashboard Functionality ✅ COMPLETE
+- [x] Create Subject model (`sms-backend/src/models/subject.js`)
+- [x] Create Subject controller (`sms-backend/src/controllers/subjectController.js`)
+- [x] Create Subject routes (`sms-backend/src/routes/subjects.js`)
+- [x] Update server.js with subjects routes
 
-- [x] Add "Add New Student" quick action button
-- [x] Make recent activities interactive (clickable)
-- [x] Make upcoming events clickable
-- [x] Add refresh functionality to stats
-- [x] Add proper "View All" navigation
+### Parents Management
 
-## Phase 3: Fix Port Conflict ✅ COMPLETE
+- [x] Create Parent model (`sms-backend/src/models/parent.js`)
+- [x] Create Parent controller (`sms-backend/src/controllers/parentController.js`)
+- [x] Create Parent routes (`sms-backend/src/routes/parents.js`)
+- [x] Update server.js with parents routes
 
-- [x] Changed backend port from 5000 to 5001 (Apple AirPlay conflict)
-- [x] Updated vite.config.js proxy to port 5001
-- [x] Updated CORS configuration
+### Fees Management
 
-## Phase 4: Testing & Verification ✅ COMPLETE
+- [x] Create Fee model (`sms-backend/src/models/fee.js`)
+- [x] Create Fee controller (`sms-backend/src/controllers/feeController.js`)
+- [x] Create Fee routes (`sms-backend/src/routes/fees.js`)
+- [x] Update server.js with fees routes
 
-- [x] Test student creation - WORKING
-- [x] Test student deletion - WORKING
-- [x] Test student update/edit - WORKING
-- [x] Test dashboard navigation - WORKING
-- [x] Verify all buttons work - WORKING
+## Phase 2: Frontend Integration
 
-## Summary of Changes
+### Subjects
 
-### Backend (Port 5001)
+- [ ] Create subjectService (`sms-frontend/src/services/subjectService.js`)
+- [ ] Update SubjectList.jsx to use backend API
 
-1. **sms-backend/server.js**: Changed PORT to 5001
-2. **sms-backend/src/controllers/studentController.js**: Added getById, updateStudent, deleteStudent
-3. **sms-backend/src/routes/students.js**: Added GET /:id, PUT /:id, DELETE /:id routes
+### Parents
 
-### Frontend
+- [ ] Create parentService (`sms-frontend/src/services/parentService.js`)
+- [ ] Update ParentDirectory.jsx to use backend API
 
-1. **sms-frontend/vite.config.js**: Updated proxy target to http://localhost:5001
-2. **sms-frontend/src/services/studentService.js**: Added getById, update, delete methods
-3. **sms-frontend/src/components/Students/StudentList.jsx**: Added handleView, handleEdit, handleDelete with useNavigate
-4. **sms-frontend/src/components/Students/StudentForm.jsx**: Added edit mode with useParams, useEffect for fetching data
-5. **sms-frontend/src/components/Dashboard/Dashboard.jsx**: Added quickActions, handleRefresh, handleActivityClick, handleEventClick
+### Fees
 
-### API Test Results
+- [ ] Create feeService (`sms-frontend/src/services/feeService.js`)
+- [ ] Update FeeManager.jsx to use backend API
 
-- POST /api/students - ✅ Creates student successfully
-- GET /api/students - ✅ Returns list with user data
-- GET /api/students/:id - ✅ Returns single student
-- PUT /api/students/:id - ✅ Updates student
-- DELETE /api/students/:id - ✅ Deletes student (with User cascade)
+## Phase 3: Deployment Configuration
 
-## All Issues Resolved! 🎉
+- [ ] Add environment variable documentation
+- [ ] Create production build scripts
+- [ ] Add error boundaries
+- [ ] Create README with setup instructions
+
+## Progress: 40% (Backend Complete, Frontend Pending)

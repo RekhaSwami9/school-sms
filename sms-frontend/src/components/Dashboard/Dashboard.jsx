@@ -79,7 +79,7 @@ const Dashboard = () => {
     },
     {
       label: "Add Teacher",
-      action: () => navigate("/teachers"),
+      action: () => openQuickModal("teacher"),
       icon: "👨‍🏫",
       color: "#10b981",
     },

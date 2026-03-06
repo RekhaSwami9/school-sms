@@ -10,6 +10,9 @@ const classRoutes = require("./src/routes/classes");
 const attendanceRoutes = require("./src/routes/attendance");
 const gradeRoutes = require("./src/routes/grades");
 const searchRoutes = require("./src/routes/search");
+const subjectRoutes = require("./src/routes/subjects");
+const parentRoutes = require("./src/routes/parents");
+const feeRoutes = require("./src/routes/fees");
 
 const app = express();
 const PORT = 5001;
@@ -36,6 +39,9 @@ app.use("/api/classes", classRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/grades", gradeRoutes);
 app.use("/api/search", searchRoutes);
+app.use("/api/subjects", subjectRoutes);
+app.use("/api/parents", parentRoutes);
+app.use("/api/fees", feeRoutes);
 
 sequelize
   .sync({ alter: true })
