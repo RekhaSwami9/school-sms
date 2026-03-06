@@ -8,9 +8,19 @@
     "dev:backend": "cd sms-backend && npm run dev",
     "dev:frontend": "cd sms-frontend && npm run dev",
     "install:all": "npm install && cd sms-backend && npm install && cd ../sms-frontend && npm install",
+    "build:frontend": "cd sms-frontend && npm run build",
+    "start:backend": "cd sms-backend && npm start",
+    "start:frontend": "cd sms-frontend && npm run preview",
+    "deploy": "npm run build:frontend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "school",
+    "management",
+    "system",
+    "education",
+    "mern"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",

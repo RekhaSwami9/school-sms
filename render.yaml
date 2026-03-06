@@ -1,0 +1,43 @@
+services:
+  # Backend API Service
+  - type: web
+    name: school-sms-backend
+    env: node
+    region: oregon
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DB_HOST
+        fromDatabase:
+          name: school-sms-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: school-sms-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: school-sms-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: school-sms-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: school-sms-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+
+  # PostgreSQL Database
+  - type: psql
+    name: school-sms-db
+    region: oregon
+    plan: free
