@@ -102,6 +102,7 @@ const Navbar = () => {
             marginLeft: "auto",
           }}
         >
+          <Link to="/profile" title="Profile" style={{ textDecoration: "none", color: "var(--text-secondary)", fontSize: "14px" }}>👤 Profile</Link>
           <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
             {user?.name || "User"}
           </span>
