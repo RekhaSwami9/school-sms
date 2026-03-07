@@ -25,6 +25,9 @@ import FeeManager from "./components/Fees/FeeManager";
 import EventCalendar from "./components/Events/EventCalendar";
 import EventForm from "./components/Events/EventForm";
 import ParentDirectory from "./components/Parents/ParentDirectory";
+import Timetable from "./components/Timetable/Timetable";
+import Reports from "./components/Reports/Reports";
+import Notifications from "./components/Notifications/Notifications";
 import "./App.css";
 
 // Role definitions
@@ -209,6 +212,45 @@ function App() {
                     allowedRoles={[ROLES.ADMIN, ROLES.ACCOUNTANT]}
                   >
                     <FeeManager />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Timetable - All users */}
+              <Route
+                path="timetable"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={[ROLES.ADMIN, ROLES.TEACHER, ROLES.STUDENT]}
+                  >
+                    <Timetable />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Reports - Admin only */}
+              <Route
+                path="reports"
+                element={
+                  <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+                    <Reports />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Notifications - All users */}
+              <Route
+                path="notifications"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={[
+                      ROLES.ADMIN,
+                      ROLES.TEACHER,
+                      ROLES.STUDENT,
+                      ROLES.PARENT,
+                    ]}
+                  >
+                    <Notifications />
                   </ProtectedRoute>
                 }
               />

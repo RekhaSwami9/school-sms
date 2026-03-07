@@ -67,8 +67,23 @@ const Navbar = () => {
               <Link to="/events" title="Events">
                 <span className="nav-icon">📅</span> Events
               </Link>
+              <Link to="/timetable" title="Timetable">
+                <span className="nav-icon">🕐</span> Timetable
+              </Link>
             </>
           )}
+
+          {/* Admin only - Reports */}
+          {isAdmin && (
+            <Link to="/reports" title="Reports">
+              <span className="nav-icon">📈</span> Reports
+            </Link>
+          )}
+
+          {/* All authenticated users */}
+          <Link to="/notifications" title="Notifications">
+            <span className="nav-icon">🔔</span> Notifications
+          </Link>
 
           {/* Admin and Accountant */}
           {(isAdmin || isAccountant) && (
@@ -102,7 +117,17 @@ const Navbar = () => {
             marginLeft: "auto",
           }}
         >
-          <Link to="/profile" title="Profile" style={{ textDecoration: "none", color: "var(--text-secondary)", fontSize: "14px" }}>👤 Profile</Link>
+          <Link
+            to="/profile"
+            title="Profile"
+            style={{
+              textDecoration: "none",
+              color: "var(--text-secondary)",
+              fontSize: "14px",
+            }}
+          >
+            👤 Profile
+          </Link>
           <span style={{ fontSize: "14px", color: "var(--text-secondary)" }}>
             {user?.name || "User"}
           </span>
