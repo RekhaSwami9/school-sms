@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { subjectService } from "../../services/subjectService";
-import { teacherService } from "../../services/teacherService";
+import teacherService from "../../services/teacherService";
 import { useToast } from "../../context/ToastContext";
 
 const SubjectList = () => {
@@ -54,7 +54,8 @@ const SubjectList = () => {
     return (
       subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       subject.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (subject.description && subject.description.toLowerCase().includes(searchTerm.toLowerCase()))
+      (subject.description &&
+        subject.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   });
 
@@ -125,7 +126,9 @@ const SubjectList = () => {
     }
   };
 
-  const activeSubjects = subjectsList.filter(s => s.status === "Active").length;
+  const activeSubjects = subjectsList.filter(
+    (s) => s.status === "Active",
+  ).length;
   const coreSubjects = 12; // Can be calculated from backend
   const electives = 8;
 
@@ -169,12 +172,12 @@ const SubjectList = () => {
             <div className="stat-card-icon">📊</div>
           </div>
           <div className="stat-card-value">
-            {subjectsList.length > 0 ? (
-              (
-                subjectsList.reduce((sum, s) => sum + (s.credits || 0), 0) /
-                subjectsList.length
-              ).toFixed(1)
-            ) : 0}
+            {subjectsList.length > 0
+              ? (
+                  subjectsList.reduce((sum, s) => sum + (s.credits || 0), 0) /
+                  subjectsList.length
+                ).toFixed(1)
+              : 0}
           </div>
         </div>
       </div>
@@ -216,7 +219,10 @@ const SubjectList = () => {
       </div>
 
       {loading ? (
-        <div className="card-modern" style={{ textAlign: "center", padding: "60px" }}>
+        <div
+          className="card-modern"
+          style={{ textAlign: "center", padding: "60px" }}
+        >
           <div className="loading-spinner" style={{ margin: "0 auto" }}></div>
           <p style={{ marginTop: "16px" }}>Loading subjects...</p>
         </div>
@@ -232,7 +238,10 @@ const SubjectList = () => {
                 <h3 className="card-title">
                   {selectedSubject.name} ({selectedSubject.code})
                 </h3>
-                <button onClick={closeDetail} className="btn btn-sm btn-secondary">
+                <button
+                  onClick={closeDetail}
+                  className="btn btn-sm btn-secondary"
+                >
                   ✕ Close
                 </button>
               </div>
@@ -262,7 +271,9 @@ const SubjectList = () => {
                     >
                       Subject Code
                     </p>
-                    <p style={{ margin: 0, fontWeight: "600", fontSize: "18px" }}>
+                    <p
+                      style={{ margin: 0, fontWeight: "600", fontSize: "18px" }}
+                    >
                       {selectedSubject.code}
                     </p>
                   </div>
@@ -283,7 +294,9 @@ const SubjectList = () => {
                     >
                       Credits
                     </p>
-                    <p style={{ margin: 0, fontWeight: "600", fontSize: "18px" }}>
+                    <p
+                      style={{ margin: 0, fontWeight: "600", fontSize: "18px" }}
+                    >
                       {selectedSubject.credits}
                     </p>
                   </div>
@@ -325,7 +338,9 @@ const SubjectList = () => {
                     >
                       Status
                     </p>
-                    <span className={`badge ${selectedSubject.status === "Active" ? "badge-success" : "badge-warning"}`}>
+                    <span
+                      className={`badge ${selectedSubject.status === "Active" ? "badge-success" : "badge-warning"}`}
+                    >
                       {selectedSubject.status || "Active"}
                     </span>
                   </div>
@@ -406,8 +421,14 @@ const SubjectList = () => {
                     </div>
                     <span
                       style={{
-                        background: subject.status === "Active" ? "var(--success-light)" : "var(--warning-light)",
-                        color: subject.status === "Active" ? "var(--success)" : "var(--warning)",
+                        background:
+                          subject.status === "Active"
+                            ? "var(--success-light)"
+                            : "var(--warning-light)",
+                        color:
+                          subject.status === "Active"
+                            ? "var(--success)"
+                            : "var(--warning)",
                         padding: "4px 12px",
                         borderRadius: "20px",
                         fontSize: "12px",
@@ -435,7 +456,9 @@ const SubjectList = () => {
                       lineHeight: "1.5",
                     }}
                   >
-                    {subject.description ? subject.description.substring(0, 80) + "..." : "No description"}
+                    {subject.description
+                      ? subject.description.substring(0, 80) + "..."
+                      : "No description"}
                   </p>
 
                   <div
@@ -557,4 +580,63 @@ const SubjectList = () => {
               <div style={{ marginBottom: "16px" }}>
                 <label className="form-label">Description</label>
                 <textarea
-                  name="
+                  name="description"
+                  value={newSubject.description}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  placeholder="Enter subject description"
+                  rows={4}
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label className="form-label">Credits</label>
+                <input
+                  type="number"
+                  name="credits"
+                  value={newSubject.credits}
+                  onChange={handleInputChange}
+                  className="form-control"
+                  min="1"
+                  max="10"
+                />
+              </div>
+
+              <div style={{ marginBottom: "16px" }}>
+                <label className="form-label">Assigned Teacher</label>
+                <select
+                  name="teacherId"
+                  value={newSubject.teacherId}
+                  onChange={handleInputChange}
+                  className="form-control"
+                >
+                  <option value="">Select Teacher</option>
+                  {teachers.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: "flex", gap: "10px", marginTop: "20px" }}>
+                <button type="submit" className="btn btn-primary">
+                  Add Subject
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCloseModal}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default SubjectList;

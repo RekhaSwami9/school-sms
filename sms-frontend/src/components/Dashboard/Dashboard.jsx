@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { studentService } from "../../services/studentService";
+import { useAuth } from "../../context/AuthContext";
 import {
   teachers,
   classes,
@@ -11,11 +12,14 @@ import {
 } from "../../services/mockData";
 import { Link } from "react-router-dom";
 import QuickActionModal from "../Common/QuickActionModal";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useToast } from "../../context/ToastContext";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { showSuccess } = useToast();
+  const { user, isAdmin, isTeacher, isStudent, isParent, isAccountant } =
+    useAuth();
   const [stats, setStats] = useState({
     totalStudents: 0,
     loading: true,
@@ -200,8 +204,16 @@ const Dashboard = () => {
       {/* Page Header */}
       <div className="page-header">
         <div>
-          <h1>Dashboard</h1>
-          <p>Welcome back! Here's what's happening at your school today.</p>
+          <h1>Welcome{user?.name ? `, ${user.name}` : ""}!</h1>
+          <p>
+            {isAdmin &&
+              "You have full access to manage the entire school system."}
+            {isTeacher &&
+              "You can manage classes, attendance, grades, and events."}
+            {isStudent && "View your grades, attendance, and school events."}
+            {isParent && "Track your child's progress, grades, and attendance."}
+            {isAccountant && "Manage school fees and financial transactions."}
+          </p>
         </div>
         <button
           onClick={handleRefresh}
